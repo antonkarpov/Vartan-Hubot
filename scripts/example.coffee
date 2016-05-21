@@ -12,7 +12,7 @@ https = require('follow-redirects').https
 module.exports = (robot) ->
   	  robot.respond /(order|добавить|добавь|хочу|o) (.*) за ([\d]*)/i, (msg) ->
   	    try
-          sender = get_username(msg)
+          sender = msg.message.get_username
         catch error
           sender = "Братишка"
 
