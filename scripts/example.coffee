@@ -12,7 +12,7 @@ https = require('follow-redirects').https
 module.exports = (robot) ->
   	  robot.respond /(order|добавить|добавь|хочу|o) (.*) за ([\d]*)/i, (msg) ->
   	    try
-          sender = msg.message.user.name
+          sender = "@" + msg.message.user.name
         catch error
           sender = "Братишка"
 
@@ -47,7 +47,7 @@ module.exports = (robot) ->
 
       robot.respond /(show|s|покажи) (order|o|заказ)/i, (msg) ->
         try
-          sender = msg.message.user.name
+          sender = "@" + msg.message.user.name
         catch error
           sender = "Братишка"
 
@@ -86,7 +86,7 @@ module.exports = (robot) ->
 
       robot.respond /(show|покажи) (total|сумму)/i, (msg) ->
         try
-          sender = msg.message.user.name
+          sender = "@" + msg.message.user.name
         catch error
           sender = "Братишка"
 
