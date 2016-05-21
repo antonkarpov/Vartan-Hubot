@@ -7,6 +7,7 @@
 #   Uncomment the ones you want to try and experiment with.
 #
 #   These are from the scripting documentation: https://github.com/github/hubot/blob/master/docs/scripting.md
+https = require('follow-redirects').https
 
 module.exports = (robot) ->
   	  robot.respond /(order|добавить|добавь|хочу|o) (.*) за ([\d]*)/i, (msg) ->
@@ -99,7 +100,9 @@ module.exports = (robot) ->
 
       robot.respond /Хочу есть/i, (msg) ->
         msg.send 'Кушай, дорогой'
-
+        https.get 'https://script.google.com/macros/s/AKfycbxiyTu9Vfkd2KQGbvwSd3ZJCiKPM5mYEnsYr4-uVTzzfkulX1C6/exec', (res) ->
+          res.on 'data', (chunk) ->
+            msg.send chunk;
 
   #   doorType = res.match[1]
   #   if doorType is "pod bay"
