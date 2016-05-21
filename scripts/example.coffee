@@ -9,79 +9,90 @@
 #   These are from the scripting documentation: https://github.com/github/hubot/blob/master/docs/scripting.md
 
 module.exports = (robot) ->
-  	  robot.hear /(order|o) (.*) ([\d]*)/i, (msg) ->
+  	  robot.respond /(order|добавить|добавь|хочу|o) (.*) за ([\d]*)/i, (msg) ->
   	    try
-          sender = msg.message.user.name
+          sender = get_username(msg)
         catch error
-          sender = "А mysterious stranger"
-        goods = msg.match[2].trim()
-        if goods.length == 0
-          msg.send sender + ", What you want to order? Type {good} {price} after order. One line - one order"
-          return  
+          sender = "Братишка"
+
+        name = msg.match[2].trim()
+
+        if name.length == 0
+          msg.send sender + 
+          ", дорогой, ты уж скажи, что ты хочешь заказать? Советую - 'добавить шашлык со свининой в лаваше за 110'"
+          return
+
         price = msg.match[3].trim()
+
         if price.length == 0
-          msg.send sender + ", What you want to order? Type {good} {price} after order. One line - one order"
+          msg.send sender + ", дорогой, цену указать не забудь. Советую - 'добавить шашлык со свининой в лаваше за 110'"
         else
-          msg.send(sender + ", *" + goods + "* - "+ price + "р - was added to your order")
-        msg.send()
+
+          try
+            dudes = robot.brain.get('food_order_dudes')
+          catch e
+            dudes = {}
+          
+          try
+            dude_order = dudes[sender]
+          catch e
+            dude_order = []
+
+          new_item = {}
+          new_item["name"] = name
+          new_item["price"] = price
+
+          try
+            dude_order.push new_item
+            msg.send(sender + ", *" + name + "* за "+ price + "р - добавлено к заказу")
+          catch
+            msg.send(sender + ", *" + name + "* за "+ price + "р - не в силах добавить, сожалею")
+        
       
-      robot.hear /(show|s) (order|o)?/i, (msg) ->
+
+
+
+      robot.hear /\bup\b/, (msg) ->
+        # note that this variable is *GLOBAL TO ALL SCRIPTS* so choose a unique name
+        robot.brain.set('everything_uppity_count', 
+          (robot.brain.get('everything_uppity_count') || 0) + 1)
+
+      robot.hear /are we up?/i, (msg) ->
+        msg.send "Up-ness: " + (robot.brain.get('everything_uppity_count') || "0")
+
+
+      robot.respond /(show|s|покажи) (order|o|заказ)?/i, (msg) ->
         try
-          sender = msg.message.user.name
+          sender = get_username(msg)
         catch error
-          sender = "А mysterious stranger"
-        goods = msg.match[2].trim()
-        if goods.length == 0
-          msg.send sender + ", you ordered :{my_stuff}"
+          sender = "Братишка"
+
+        myorder = msg.match[2].trim()
+
+        if myorder.length == 0
+          msg.send sender + ", вот весь заказ :{all_stuff}"
         else   
-          msg.send sender + ", everyone ordered :{all_stuff}"
+          msg.send sender + ", вот твой список :{my_stuff}"
         
-        msg.send()
-      
-      robot.hear /(cancel|c) (order|o)? (.*)?/i, (msg) ->
+
+      robot.respond /(show|покажи) (total|сумму)?/i, (msg) ->
         try
-          sender = msg.message.user.name
+          sender = get_username(msg)
         catch error
-          sender = "А mysterious stranger"
-        goods = msg.match[2].trim()
-        if goods.length == 0
-          msg.send sender + ", {food} was removed from order"
+          sender = "Братишка"
+
+        sum = msg.match[2].trim()
+
+        if sum.length == 0
+          msg.send sender + ", общая цена заказа - {price}р"
         else   
-          msg.send sender + ", all your order was canceled"
-        
-        msg.send()
+          msg.send sender + ", сумма твоего заказа - {price}p"
 
-      robot.hear /(price|p) (order|o)?/i, (msg) ->
-        try
-          sender = msg.message.user.name
-        catch error
-          sender = "А mysterious stranger"
-        goods = msg.match[2].trim()
-        if goods.length == 0
-          msg.send sender + ", your order price - {price}р"
-        else   
-          msg.send sender + ", all order price - {price}p"
-        
-        msg.send()
 
-#      robot.respond /(order)? (.*)/i, (msg)->
-#          try
-#            sender = msg.message.user.name.toLowerCase()
-#          catch error
-#            sender = "А mysterious stranger"
-#
-#          goods = msg.match[2].trim()
-#          if goods.length == 0
-#            msg.send sender + ", What you want to order? Type {good} {price} after order. One line - one order"
-#          else
-#            msg.send(sender + ", " + goods + " - was added to your order")
-#            msg.send()
+      robot.respond /Хочу есть/i, (msg) ->
+        msg.send 'Кушай, дорогой'
 
-      robot.respond /open the pod bay doors/i, (res) ->
-        res.reply "I'm afraid I can't let you do that."
 
-      robot.hear /I like pie/i, (res) ->
-        res.emote "makes a freshly baked pie"
   #   doorType = res.match[1]
   #   if doorType is "pod bay"
   #     res.reply "I'm afraid I can't let you do that."
