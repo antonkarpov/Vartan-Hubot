@@ -28,15 +28,8 @@ module.exports = (robot) ->
           msg.send sender + ", дорогой, цену указать не забудь. Советую - 'добавить шашлык со свининой в лаваше за 110'"
         else
 
-          try
-            dudes = robot.brain.get('food_order_dudes')
-          catch e
-            dudes = {}
-          
-          try
-            dude_order = dudes[sender]
-          catch e
-            dude_order = []
+          dudes = robot.brain.get('food_order_dudes') or {}
+          dude_order = dudes[sender] or []
 
           new_item = {}
           new_item["name"] = name
@@ -44,38 +37,53 @@ module.exports = (robot) ->
 
           try
             dude_order.push new_item
+            dudes[sender] = dude_order
+            robot.brain.set('food_order_dudes', dudes)
             msg.send(sender + ", *" + name + "* за "+ price + "р - добавлено к заказу")
           catch
             msg.send(sender + ", *" + name + "* за "+ price + "р - не в силах добавить, сожалею")
-        
-      
 
 
-
-      robot.hear /\bup\b/, (msg) ->
-        # note that this variable is *GLOBAL TO ALL SCRIPTS* so choose a unique name
-        robot.brain.set('everything_uppity_count', 
-          (robot.brain.get('everything_uppity_count') || 0) + 1)
-
-      robot.hear /are we up?/i, (msg) ->
-        msg.send "Up-ness: " + (robot.brain.get('everything_uppity_count') || "0")
-
-
-      robot.respond /(show|s|покажи) (order|o|заказ)?/i, (msg) ->
+      robot.respond /(show|s|покажи) (order|o|заказ)/i, (msg) ->
         try
           sender = get_username(msg)
         catch error
           sender = "Братишка"
 
-        myorder = msg.match[2].trim()
+        my_order = msg.match[2].trim()
 
-        if myorder.length == 0
-          msg.send sender + ", вот весь заказ :{all_stuff}"
-        else   
-          msg.send sender + ", вот твой список :{my_stuff}"
-        
+        try
+          dudes = robot.brain.get('food_order_dudes')
+        catch e
+          dudes = {}
 
-      robot.respond /(show|покажи) (total|сумму)?/i, (msg) ->
+        order_string = sender
+
+        if my_order.length == 0
+          order_string += ", вот весь заказ : \n"
+          for d, d_order of dudes
+            if d_order.length > 0
+              order_string += d + ":\n"
+              for item in d_order
+                order_string += item["name"] + " - " + item["price"] + "\n"
+        else
+          try
+            dude_order = dudes[sender]
+          catch e
+            dude_order = []
+
+          if dude_order.length > 0
+            order_string += ", вот твой заказ : \n"
+            order_string += sender + ":\n"
+            for item in dude_order
+              order_string += item["name"] + " - " + item["price"] + "\n"
+          else
+            order_string += ", не заказывал ты ничего пока"
+          
+        msg.send order_string
+
+
+      robot.respond /(show|покажи) (total|сумму)/i, (msg) ->
         try
           sender = get_username(msg)
         catch error
