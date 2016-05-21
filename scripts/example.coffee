@@ -9,11 +9,79 @@
 #   These are from the scripting documentation: https://github.com/github/hubot/blob/master/docs/scripting.md
 
 module.exports = (robot) ->
+  	  robot.hear /(order|o) (.*) ([\d]*)/i, (msg) ->
+  	    try
+          sender = msg.message.user.name
+        catch error
+          sender = "А mysterious stranger"
+        goods = msg.match[2].trim()
+        if goods.length == 0
+          msg.send sender + ", What you want to order? Type {good} {price} after order. One line - one order"
+          return  
+        price = msg.match[3].trim()
+        if price.length == 0
+          msg.send sender + ", What you want to order? Type {good} {price} after order. One line - one order"
+        else
+          msg.send(sender + ", *" + goods + "* - "+ price + "р - was added to your order")
+        msg.send()
+      
+      robot.hear /(show|s) (order|o)?/i, (msg) ->
+        try
+          sender = msg.message.user.name
+        catch error
+          sender = "А mysterious stranger"
+        goods = msg.match[2].trim()
+        if goods.length == 0
+          msg.send sender + ", you ordered :{my_stuff}"
+        else   
+          msg.send sender + ", everyone ordered :{all_stuff}"
+        
+        msg.send()
+      
+      robot.hear /(cancel|c) (order|o)? (.*)?/i, (msg) ->
+        try
+          sender = msg.message.user.name
+        catch error
+          sender = "А mysterious stranger"
+        goods = msg.match[2].trim()
+        if goods.length == 0
+          msg.send sender + ", {food} was removed from order"
+        else   
+          msg.send sender + ", all your order was canceled"
+        
+        msg.send()
 
-  # robot.hear /badger/i, (res) ->
-  #   res.send "Badgers? BADGERS? WE DON'T NEED NO STINKIN BADGERS"
-  #
-  # robot.respond /open the (.*) doors/i, (res) ->
+      robot.hear /(price|p) (order|o)?/i, (msg) ->
+        try
+          sender = msg.message.user.name
+        catch error
+          sender = "А mysterious stranger"
+        goods = msg.match[2].trim()
+        if goods.length == 0
+          msg.send sender + ", your order price - {price}р"
+        else   
+          msg.send sender + ", all order price - {price}p"
+        
+        msg.send()
+
+#      robot.respond /(order)? (.*)/i, (msg)->
+#          try
+#            sender = msg.message.user.name.toLowerCase()
+#          catch error
+#            sender = "А mysterious stranger"
+#
+#          goods = msg.match[2].trim()
+#          if goods.length == 0
+#            msg.send sender + ", What you want to order? Type {good} {price} after order. One line - one order"
+#          else
+#            msg.send(sender + ", " + goods + " - was added to your order")
+#            msg.send()
+
+      robot.respond /open the pod bay doors/i, (res) ->
+        res.reply "I'm afraid I can't let you do that."
+
+      robot.hear /I like pie/i, (res) ->
+        res.emote "makes a freshly baked pie"
   #   doorType = res.match[1]
   #   if doorType is "pod bay"
   #     res.reply "I'm afraid I can't let you do that."
